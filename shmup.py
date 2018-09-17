@@ -1,4 +1,4 @@
-# shmup game
+# shmup game - John's edits
 import pygame
 import random
 from os import path

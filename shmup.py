@@ -6,8 +6,8 @@ from os import path
 img_dir = path.join(path.dirname(__file__), 'img')
 
 
-WIDTH = 480 #width of our game window
-HEIGHT = 600 # height of our game window
+WIDTH = 580 #width of our game window
+HEIGHT = 600# height of our game window
 FPS = 60 #number of frames per second
 
 #define colours
@@ -30,6 +30,8 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(player_img, (50, 38))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        self.radius = 13
+
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
@@ -59,9 +61,11 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(enemy_img, (50, 38))
+        self.image = pygame.transform.scale(enemy_img, (51,41 ))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
+        self.radius = int(self.rect.width / 3)
+
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
         self.speedy = random.randrange(1,8)
@@ -134,7 +138,7 @@ while  running:
         all_sprites.add(m)
         mobs.add(m)
 
-    hits = pygame.sprite.spritecollide(player, mobs, False)
+    hits = pygame.sprite.spritecollide(player, mobs, False, pygame.sprite.collide_circle)
     if hits:
         running = False
 

@@ -9,6 +9,7 @@ img_dir = path.join(path.dirname(__file__), 'img')
 WIDTH = 580 #width of our game window
 HEIGHT = 600# height of our game window
 FPS = 60 #number of frames per second
+score = 0
 
 #define colours
 WHITE = (255, 255, 255)
@@ -23,6 +24,14 @@ pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("shmup!")
 clock = pygame.time.Clock()
+
+font_name = pygame.font.match_font('arial')
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, WHITE)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -134,6 +143,7 @@ while  running:
     all_sprites.update()
     hits =  pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits:
+        score += 1
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
@@ -147,6 +157,7 @@ while  running:
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     # *after* drawing, flip everything
+    draw_text(screen, "Score: " + str(score), 18, WIDTH / 2, 10)
     pygame.display.flip()
 
 pygame.quit()

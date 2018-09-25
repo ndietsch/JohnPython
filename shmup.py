@@ -1,10 +1,16 @@
 # shmup game - John's edits
+# KidsCanCode - Game Development with Pygame video series
+# Video link: https://www.youtube.com/watch?v=abm1VwFxv9o
+# Sound and Music
+# Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3
+# Art from Kenney.nl
+
 import pygame
 import random
 from os import path
 
 img_dir = path.join(path.dirname(__file__), 'img')
-
+snd_dir = path.join(path.dirname(__file__), 'snd')
 
 WIDTH = 580 #width of our game window
 HEIGHT = 600# height of our game window
@@ -66,6 +72,7 @@ class Player(pygame.sprite.Sprite):
         bullet = Bullet(self.rect.centerx, self.rect.top)
         all_sprites.add(bullet)
         bullets.add(bullet)
+        shoot_sound.play()
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
@@ -113,7 +120,13 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip3_green.png")).convert()
 enemy_img = pygame.image.load(path.join(img_dir, "enemyRed5.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserGreen11.png")).convert()
-
+# Load all sounds
+shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'pew.wav'))
+expl_sounds = []
+for snd in ['expl3.wav', 'expl6.wav']:
+    expl_sounds.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
+pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
+pygame.mixer.music.set_volume(0.4)
 
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
@@ -126,6 +139,7 @@ for i in range(8):
     all_sprites.add(m)
     mobs.add(m)
 
+pygame.mixer.music.play(loops=-1)
 # Game loop
 running = True
 while  running:
@@ -144,6 +158,7 @@ while  running:
     hits =  pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits:
         score += 1
+        random.choice(expl_sounds).play()
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)

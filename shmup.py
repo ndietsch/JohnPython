@@ -1,10 +1,3 @@
-# shmup game - Johns edits
-# KidsCanCode - Game Development with Pygame video series
-# Video link: https://www.youtube.com/watch?v=abm1VwFxv9o
-# Sound and Music
-# Frozen Jam by tgfcoder <https://twitter.com/tgfcoder> licensed under CC-BY-3
-# Art from Kenney.nl
-
 import pygame
 import random
 from os import path
@@ -12,7 +5,7 @@ from os import path
 img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
 
-WIDTH = 580 #width of our game window
+WIDTH =  610#width of our game window
 HEIGHT = 600# height of our game window
 FPS = 60 #number of frames per second
 score = 0
@@ -58,11 +51,12 @@ def draw_shield_bar(surf, x, y, pct):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(player_img, (50, 38))
+        self.image = pygame.transform.scale(player_img, (51,50))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = 13
-
+        self.last_shot = pygame.time.get_ticks()
+        self.shoot_delay = 250
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
@@ -79,6 +73,8 @@ class Player(pygame.sprite.Sprite):
             self.speedx += 5
         if keystate[pygame.K_RIGHT]:
             self.speedx += 5
+        if keystate[pygame.K_SPACE]:
+            self.shoot()
         self.rect.x += self.speedx
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
@@ -86,15 +82,19 @@ class Player(pygame.sprite.Sprite):
              self.rect.left = 0
 
     def shoot(self):
-        bullet = Bullet(self.rect.centerx, self.rect.top)
-        all_sprites.add(bullet)
-        bullets.add(bullet)
-        shoot_sound.play()
+        now = pygame.time.get_ticks()
+        if now - self.last_shot > self.shoot_delay:
+            self.last_shot = now
+            bullet = Bullet(self.rect.centerx, self.rect.top)
+            all_sprites.add(bullet)
+            bullets.add(bullet)
+            shoot_sound.play()
+
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(enemy_img, (51,41 ))
+        self.image = pygame.transform.scale(enemy_img, (55, 50 ))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width / 3)
@@ -137,6 +137,15 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip3_green.png")).convert()
 enemy_img = pygame.image.load(path.join(img_dir, "enemyRed5.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserGreen11.png")).convert()
+
+explosion_anim = {}
+explosion_anim['lg'] = []
+explosion_anim['sm'] = []
+for i in range(9):
+    filename = 'regularExplosion0{}.png'.format(i)
+    img = pygame.image.load(path.join(img_dir, filename)).convert()
+    # We need to come back to this part - http://kidscancode.org/blog/2016/09/pygame_shmup_part_10/
+
 # Load all sounds
 shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'pew.wav'))
 expl_sounds = []
@@ -166,10 +175,7 @@ while  running:
         # check for closing window
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.shoot()
-    #Update
+    # Update
     all_sprites.update()
     hits =  pygame.sprite.groupcollide(mobs, bullets, True, True)
     for hit in hits:

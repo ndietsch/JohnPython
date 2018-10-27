@@ -1,4 +1,3 @@
-
 import pygame
 import random
 from os import path
@@ -6,7 +5,7 @@ from os import path
 img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
 
-WIDTH = 580 #width of our game window
+WIDTH =  610#width of our game window
 HEIGHT = 600# height of our game window
 FPS = 60 #number of frames per second
 score = 0
@@ -52,7 +51,7 @@ def draw_shield_bar(surf, x, y, pct):
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(player_img, (50, 38))
+        self.image = pygame.transform.scale(player_img, (100, 100))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = 13
@@ -88,7 +87,7 @@ class Player(pygame.sprite.Sprite):
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(enemy_img, (51,41 ))
+        self.image = pygame.transform.scale(enemy_img, (110,100 ))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width / 3)
@@ -112,6 +111,7 @@ class Mob(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
+        
         self.image = bullet_img
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
@@ -161,7 +161,7 @@ while  running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_i:
+            if event.key == pygame.K_SPACE:
                 player.shoot()
     #Update
     all_sprites.update()

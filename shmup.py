@@ -106,15 +106,12 @@ class Player(pygame.sprite.Sprite):
             bullets.add(bullet)
             shoot_sound.play()
 
-<<<<<<< HEAD
     def hide(self):
         # Hide the player temporarily
         self.hidden = True
         self.hide_timer = pygame.time.get_ticks()
         self.rect.center = (WIDTH/2, HEIGHT+200)
 
-=======
->>>>>>> 5d098bed37a39a003b892095696e2fdeb83bb631
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self):
@@ -123,7 +120,6 @@ class Mob(pygame.sprite.Sprite):
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = int(self.rect.width / 3)
-
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
         self.speedy = random.randrange(1,8)
@@ -187,17 +183,13 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip3_green.png")).convert()
 enemy_img = pygame.image.load(path.join(img_dir, "enemyRed5.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserGreen11.png")).convert()
-<<<<<<< HEAD
 player_mini_img = pygame.transform.scale(player_img, (25, 19))
 player_mini_img.set_colorkey(BLACK)
 
-=======
->>>>>>> 5d098bed37a39a003b892095696e2fdeb83bb631
 
 explosion_anim = {}
 explosion_anim['lg'] = []
 explosion_anim['sm'] = []
-<<<<<<< HEAD
 explosion_anim['player'] = []
 for i in range(9):
     filename = 'regularExplosion0{}.png'.format(i)
@@ -211,18 +203,17 @@ for i in range(9):
     img = pygame.image.load(path.join(img_dir, filename)).convert()
     img.set_colorkey(BLACK)
     explosion_anim['player'].append(img)
-=======
 for i in range(9):
     filename = 'regularExplosion0{}.png'.format(i)
     img = pygame.image.load(path.join(img_dir, filename)).convert()
     # We need to come back to this part - http://kidscancode.org/blog/2016/09/pygame_shmup_part_10/
->>>>>>> 5d098bed37a39a003b892095696e2fdeb83bb631
 
 # Load all sounds
 shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'pew.wav'))
 expl_sounds = []
 for snd in ['expl3.wav', 'expl6.wav']:
     expl_sounds.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
+
 pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
 

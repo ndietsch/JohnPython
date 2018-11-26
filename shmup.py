@@ -32,6 +32,13 @@ def draw_text(surf, text, size, x, y):
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
 
+def draw_lives(surf, x, y, lives, img):
+    for i in range(lives):
+        img_rect = img.get_rect()
+        img_rect.x = x + 30 * i
+        img_rect.y = y
+        surf.blit(img, img_rect)
+
 def new_mob():
     m = Mob()
     all_sprites.add(m)
@@ -61,9 +68,17 @@ class Player(pygame.sprite.Sprite):
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
         self.shield = 100
+        self.lives = 4
+        self.hidden = False
+        self.hide_timer = pygame.time.get_ticks()
 
 
     def update(self):
+        if self.hidden and pygame.time.get_ticks() - self.hide_timer > 1000:
+            self.hidden = False
+            self.rect.centerx = WIDTH/2
+            self.rect.bottom = HEIGHT-10
+
         self.speedx = 0
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_a]:
@@ -90,6 +105,12 @@ class Player(pygame.sprite.Sprite):
             all_sprites.add(bullet)
             bullets.add(bullet)
             shoot_sound.play()
+
+    def hide(self):
+        # Hide the player temporarily
+        self.hidden = True
+        self.hide_timer = pygame.time.get_ticks()
+        self.rect.center = (WIDTH/2, HEIGHT+200)
 
 
 class Mob(pygame.sprite.Sprite):
@@ -163,10 +184,14 @@ background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip3_green.png")).convert()
 enemy_img = pygame.image.load(path.join(img_dir, "enemyRed5.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserGreen11.png")).convert()
+player_mini_img = pygame.transform.scale(player_img, (25, 19))
+player_mini_img.set_colorkey(BLACK)
+
 
 explosion_anim = {}
 explosion_anim['lg'] = []
 explosion_anim['sm'] = []
+explosion_anim['player'] = []
 for i in range(9):
     filename = 'regularExplosion0{}.png'.format(i)
     img = pygame.image.load(path.join(img_dir, filename)).convert()
@@ -175,6 +200,10 @@ for i in range(9):
     explosion_anim['lg'].append(img_lg)
     img_sm = pygame.transform.scale(img,(32,32))
     explosion_anim['sm'].append(img_sm)
+    filename = 'sonicExplosion0{}.png'.format(i)
+    img = pygame.image.load(path.join(img_dir, filename)).convert()
+    img.set_colorkey(BLACK)
+    explosion_anim['player'].append(img)
 
 # Load all sounds
 shoot_sound = pygame.mixer.Sound(path.join(snd_dir, 'pew.wav'))
@@ -218,13 +247,20 @@ while  running:
 
 
     hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
-    if hits:
+    for hit in hits:
         player.shield -= 20
         expl = Explosion(hit.rect.center, 'sm')
         all_sprites.add(expl)
         new_mob()
         if player.shield <= 0:
-            running = False
+            death_explosion = Explosion(hit.rect.center, 'player')
+            all_sprites.add(death_explosion)
+            player.hide()
+            player.lives -= 1
+            player.shield = 100
+
+            if not player.lives == 0:
+                running = False
 
     # Render
     screen.fill(BLACK)
@@ -233,6 +269,7 @@ while  running:
     # *after* drawing, flip everything
     draw_text(screen, "Score: " + str(score), 18, WIDTH / 2, 10)
     draw_shield_bar(screen, 5, 5, player.shield)
+    draw_lives(screen, WIDTH - 130, 5, player.lives, player_mini_img)
     pygame.display.flip()
 
 pygame.quit()

@@ -2,9 +2,11 @@ import pygame
 import random
 from os import path
 
+# Setup resource directories for sound and images
 img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
 
+# Setup constant variables
 WIDTH =  610#width of our game window
 HEIGHT = 600# height of our game window
 FPS = 60 #number of frames per second
@@ -17,13 +19,15 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
-#initialise game and create window
+
+#initialise game, sound and create window
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("shmup!")
 clock = pygame.time.Clock()
 
+# Draw text function for writing on the screen
 font_name = pygame.font.match_font('arial')
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
@@ -32,6 +36,7 @@ def draw_text(surf, text, size, x, y):
     text_rect.midtop = (x, y)
     surf.blit(text_surface, text_rect)
 
+# Draw the number of lives left as images of the player ship
 def draw_lives(surf, x, y, lives, img):
     for i in range(lives):
         img_rect = img.get_rect()
@@ -39,11 +44,13 @@ def draw_lives(surf, x, y, lives, img):
         img_rect.y = y
         surf.blit(img, img_rect)
 
+# Generic function to create a new mob
 def new_mob():
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
 
+# Draw the percentage of health left in the current life
 def draw_shield_bar(surf, x, y, pct):
     if pct < 0:
         pct = 0
@@ -63,12 +70,17 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.radius = 13
         self.last_shot = pygame.time.get_ticks()
-        self.shoot_delay = 250
+        # This is a good lesson in how automatic weapons work
+        # A delay of 1000 is one shot per second (bolt action)
+        # A delay of 500 is two shots per second which is the practical rate of most assault rifles (AK47)
+        # A delay of 50 is twenty rounds per second or 1200 rounds per minute which is the rate of the MG42 per wikipedia
+        self.shoot_delay = 500
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
         self.shield = 100
         self.lives = 4
+        # By default, the player will be shown, only hidden when you have run out of health
         self.hidden = False
         self.hide_timer = pygame.time.get_ticks()
 
@@ -152,6 +164,22 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+class Pow(pygame.sprite.Sprite):
+    def __init__(self, center):
+        pygame.sprite.Sprite.__init__(self)
+        self.type = random.choice(['shield', 'gun'])
+        self.image = powerup_images[self.type]
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.speedy = 2
+
+    def update(self):
+        self.rect.y += self.speedy
+        #kill if moves off screen
+        if self.rect.top > HEIGHT:
+            self.kill()
+
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, center, size):
         pygame.sprite.Sprite.__init__(self)
@@ -185,6 +213,11 @@ enemy_img = pygame.image.load(path.join(img_dir, "enemyRed5.png")).convert()
 bullet_img = pygame.image.load(path.join(img_dir, "laserGreen11.png")).convert()
 player_mini_img = pygame.transform.scale(player_img, (25, 19))
 player_mini_img.set_colorkey(BLACK)
+
+powerup_images = {}
+powerup_images['shield'] = pygame.image.load(path.join(img_dir, 'shield_gold.png')).convert()
+powerup_images['gun'] = pygame.image.load(path.join(img_dir, 'bolt_gold.png')).convert()
+
 
 
 explosion_anim = {}
@@ -220,6 +253,7 @@ pygame.mixer.music.set_volume(0.4)
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+powerups = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
 
@@ -246,10 +280,16 @@ while  running:
         random.choice(expl_sounds).play()
         expl = Explosion(hit.rect.center, 'lg')
         all_sprites.add(expl)
+        if random.random() > 0.9:
+            pow = Pow(hit.rect.center)
+            all_sprites.add(pow)
+            powerups.add(pow)
         new_mob()
 
 
 
+# Checkpoint here http://kidscancode.org/blog/2016/10/pygame_shmup_part_12/
+# Spites collide mob integation
     hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= 20
@@ -262,8 +302,8 @@ while  running:
             player.hide()
             player.lives -= 1
             player.shield = 100
-
-            if not player.lives == 0:
+            # Quit the game if we have run out of lives
+            if player.lives <= 0:
                 running = False
 
     # Render
@@ -271,8 +311,11 @@ while  running:
     screen.blit(background, background_rect)
     all_sprites.draw(screen)
     # *after* drawing, flip everything
+    # Score board
     draw_text(screen, "Score: " + str(score), 18, WIDTH / 2, 10)
+    # Percentage of life left
     draw_shield_bar(screen, 5, 5, player.shield)
+    # Draw the number of lives left as a mini image of the ship
     draw_lives(screen, WIDTH - 130, 5, player.lives, player_mini_img)
     pygame.display.flip()
 

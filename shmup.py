@@ -7,8 +7,8 @@ img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
 
 # Setup constant variables
-WIDTH =  610#width of our game window
-HEIGHT = 600# height of our game window
+WIDTH =  399#width of our game window
+HEIGHT = 499# height of our game window
 FPS = 60 #number of frames per second
 score = 0
 
@@ -288,8 +288,20 @@ while  running:
 
 
 
-# Checkpoint here http://kidscancode.org/blog/2016/10/pygame_shmup_part_12/
-# Spites collide mob integation
+# Spites collide mob integ
+
+    hits = pygame.sprite.spritecollide(player, powerups, True)
+    for hit in hits:
+        if hit.type == 'shield':
+            player.shield += random.randrange(10, 30)
+            if player.shield >= 100:
+                player.shield = 100
+        if hit.type == 'gun':
+            pass
+
+
+            # Checkpoint here http://kidscancode.org/blog/2016/10/pygame_shmup_part_12/
+
     hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
     for hit in hits:
         player.shield -= 20

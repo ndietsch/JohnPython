@@ -7,9 +7,10 @@ img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
 
 # Setup constant variables
-WIDTH =  399#width of our game window
+WIDTH =  399 #width of our game window
 HEIGHT = 499# height of our game window
 FPS = 60 #number of frames per second
+POWERUP_TIME = 5000 # TMI
 score = 0
 
 #define colours
@@ -83,9 +84,15 @@ class Player(pygame.sprite.Sprite):
         # By default, the player will be shown, only hidden when you have run out of health
         self.hidden = False
         self.hide_timer = pygame.time.get_ticks()
+        self.power = 1
+        self.power_time = pygame.time.get_ticks()
 
 
     def update(self):
+        if self.power > 2 and pygame.time.get_ticks() - self.power_time > POWERUP_TIME:
+            self.power -= 1
+            self.power_time = pygame.time.get_ticks()
+
         if self.hidden and pygame.time.get_ticks() - self.hide_timer > 1000:
             self.hidden = False
             self.rect.centerx = WIDTH/2
@@ -109,14 +116,27 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
              self.rect.left = 0
 
+    def powerup(self):
+        self.power += 1
+        self.power_time = pygame.time.get_ticks()
+
     def shoot(self):
         now = pygame.time.get_ticks()
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
-            bullet = Bullet(self.rect.centerx, self.rect.top)
-            all_sprites.add(bullet)
-            bullets.add(bullet)
-            shoot_sound.play()
+            if self.power == 1:
+                bullet = Bullet(self.rect.centerx, self.rect.top)
+                all_sprites.add(bullet)
+                bullets.add(bullet)
+                shoot_sound.play()
+            if self.power >= 2:
+                bullet1 = Bullet(self.rect.left, self.rect.centery)
+                bullet2 = Bullet(self.rect.right, self.rect.centery)
+                all_sprites.add(bullet1)
+                all_sprites.add(bullet2)
+                bullets.add(bullet1)
+                bullets.add(bullet2)
+                shoot_sound.play()
 
     def hide(self):
         # Hide the player temporarily
@@ -247,6 +267,10 @@ expl_sounds = []
 for snd in ['expl3.wav', 'expl6.wav']:
     expl_sounds.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
 
+# Load shield and fun gounds
+# Checkpoint here http://kidscancode.org/blog/2016/10/pygame_shmup_part_13/
+
+
 pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
 
@@ -297,10 +321,9 @@ while  running:
             if player.shield >= 100:
                 player.shield = 100
         if hit.type == 'gun':
-            pass
+            player.powerup()
 
 
-            # Checkpoint here http://kidscancode.org/blog/2016/10/pygame_shmup_part_12/
 
     hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
     for hit in hits:

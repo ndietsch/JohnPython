@@ -89,9 +89,10 @@ class Player(pygame.sprite.Sprite):
 
 
     def update(self):
-        if self.power > 2 and pygame.time.get_ticks() - self.power_time > POWERUP_TIME:
+        if self.power > 1 and pygame.time.get_ticks() - self.power_time > POWERUP_TIME:
             self.power -= 1
             self.power_time = pygame.time.get_ticks()
+
 
         if self.hidden and pygame.time.get_ticks() - self.hide_timer > 1000:
             self.hidden = False
@@ -117,19 +118,19 @@ class Player(pygame.sprite.Sprite):
              self.rect.left = 0
 
     def powerup(self):
-        self.power += 1
+        self.power = 2
         self.power_time = pygame.time.get_ticks()
 
     def shoot(self):
         now = pygame.time.get_ticks()
         if now - self.last_shot > self.shoot_delay:
             self.last_shot = now
-            if self.power == 1:
+            if self.power <= 1:
                 bullet = Bullet(self.rect.centerx, self.rect.top)
                 all_sprites.add(bullet)
                 bullets.add(bullet)
                 shoot_sound.play()
-            if self.power >= 2:
+            if self.power > 1:
                 bullet1 = Bullet(self.rect.left, self.rect.centery)
                 bullet2 = Bullet(self.rect.right, self.rect.centery)
                 all_sprites.add(bullet1)
@@ -267,9 +268,9 @@ expl_sounds = []
 for snd in ['expl3.wav', 'expl6.wav']:
     expl_sounds.append(pygame.mixer.Sound(path.join(snd_dir, snd)))
 
-# Load shield and fun gounds
-# Checkpoint here http://kidscancode.org/blog/2016/10/pygame_shmup_part_13/
-
+# Load shield and gun gounds
+gun_powerup_sound = pygame.mixer.Sound(path.join(snd_dir, 'gun_powerup.wav'))
+shield_powerup_sound = pygame.mixer.Sound(path.join(snd_dir, 'shield_powerup.wav'))
 
 pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
@@ -318,10 +319,12 @@ while  running:
     for hit in hits:
         if hit.type == 'shield':
             player.shield += random.randrange(10, 30)
+            shield_powerup_sound.play()
             if player.shield >= 100:
                 player.shield = 100
         if hit.type == 'gun':
             player.powerup()
+            gun_powerup_sound.play()
 
 
 
@@ -348,7 +351,7 @@ while  running:
     # *after* drawing, flip everything
     # Score board
     draw_text(screen, "Score: " + str(score), 18, WIDTH / 2, 10)
-    # Percentage of life left
+        # Percentage of life left
     draw_shield_bar(screen, 5, 5, player.shield)
     # Draw the number of lives left as a mini image of the ship
     draw_lives(screen, WIDTH - 130, 5, player.lives, player_mini_img)

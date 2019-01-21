@@ -25,7 +25,7 @@ YELLOW = (255, 255, 0)
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("shmup!")
+pygame.display.set_caption("john shmup!")
 clock = pygame.time.Clock()
 
 # Draw text function for writing on the screen
@@ -62,6 +62,21 @@ def draw_shield_bar(surf, x, y, pct):
     fill_rect = pygame.Rect(x, y, fill, BAR_HEIGHT)
     pygame.draw.rect(surf, GREEN, fill_rect)
     pygame.draw.rect(surf, WHITE, outline_rect, 2)
+
+def show_go_screen():
+    screen.blit(background,background_rect)
+    draw_text(screen,"john shmup!", 64, WIDTH / 2, HEIGHT / 4)
+    draw_text(screen, "Arrow keys move, Space to fire", 22, WIDTH / 2, HEIGHT / 2)
+    draw_text(screen, "Press a key to begin", 22, WIDTH / 2, HEIGHT * 3/4)
+    pygame.display.flip()
+    waiting = True
+    while waiting:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                if event.type == pygame.KEYUP:
+                    waiting = False
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -275,21 +290,29 @@ shield_powerup_sound = pygame.mixer.Sound(path.join(snd_dir, 'shield_powerup.wav
 pygame.mixer.music.load(path.join(snd_dir, 'tgfcoder-FrozenJam-SeamlessLoop.ogg'))
 pygame.mixer.music.set_volume(0.4)
 
-all_sprites = pygame.sprite.Group()
-mobs = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
-powerups = pygame.sprite.Group()
-player = Player()
-all_sprites.add(player)
-
-for i in range(8):
-    new_mob()
 
 
 pygame.mixer.music.play(loops=-1)
 # Game loop
+game_over = True
 running = True
 while  running:
+    if game_over:
+        show_go_screen()
+        game_over = False
+        all_sprites = pygame.sprite.Group()
+        mobs = pygame.sprite.Group()
+        bullets = pygame.sprite.Group()
+        powerups = pygame.sprite.Group()
+        player = Player()
+        all_sprites.add(player)
+
+        for i in range(8):
+            new_mob()
+
+        score = 0
+
+
     # setup clock
     clock.tick(FPS)
     # event handler
@@ -326,6 +349,8 @@ while  running:
             player.powerup()
             gun_powerup_sound.play()
 
+    if player.lives == 0:
+        game_over = True
 
 
     hits = pygame.sprite.spritecollide(player, mobs, True, pygame.sprite.collide_circle)
@@ -342,7 +367,8 @@ while  running:
             player.shield = 100
             # Quit the game if we have run out of lives
             if player.lives <= 0:
-                running = False
+                running = True
+                game_over = True
 
     # Render
     screen.fill(BLACK)

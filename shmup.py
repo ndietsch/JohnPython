@@ -7,8 +7,8 @@ img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
 
 # Setup constant variables
-WIDTH =  399 #width of our game window
-HEIGHT = 499# height of our game window
+WIDTH =  600 #width of our game window
+HEIGHT = 800# height of our game window
 FPS = 60 #number of frames per second
 POWERUP_TIME = 5000 # TMI
 score = 0
@@ -242,7 +242,8 @@ class Explosion(pygame.sprite.Sprite):
 
 
 # Load all game graphics
-background = pygame.image.load(path.join(img_dir, "spacebackground.png")).convert()
+background_img = pygame.image.load(path.join(img_dir, "spacebackground.png")).convert()
+background = pygame.transform.scale(background_img, (600, 800))
 background_rect = background.get_rect()
 player_img = pygame.image.load(path.join(img_dir, "playerShip3_green.png")).convert()
 enemy_img = pygame.image.load(path.join(img_dir, "enemyRed5.png")).convert()

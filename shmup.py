@@ -7,9 +7,9 @@ img_dir = path.join(path.dirname(__file__), 'img')
 snd_dir = path.join(path.dirname(__file__), 'snd')
 
 # Setup constant variables
-WIDTH =  600 #width of our game window
-HEIGHT = 800# height of our game window
-FPS = 60 #number of frames per second
+WIDTH =  400 #width of our game window
+HEIGHT = 500 # height of our game window
+FPS = 200 #number of frames per second
 POWERUP_TIME = 5000 # TMI
 score = 0
 
@@ -81,7 +81,7 @@ def show_go_screen():
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(player_img, (51,50))
+        self.image = pygame.transform.scale(player_img, (49,48))
         self.image.set_colorkey(BLACK)
         self.rect = self.image.get_rect()
         self.radius = 13
